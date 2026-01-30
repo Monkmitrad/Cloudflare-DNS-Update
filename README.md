@@ -8,4 +8,4 @@ It can also be found in my GitHub profile.
 
 ## Use
 Clone the repository, rename the sample-config.json into config.json and fill in the information.
-Reference for the used Cloudflare API: [LINK] (https://developers.cloudflare.com/api/resources/dns/subresources/records/)
+Reference for the used Cloudflare API: [LINK](https://developers.cloudflare.com/api/resources/dns/subresources/records/)
