@@ -1,0 +1,12 @@
+{
+    "NewIP": "",
+    "Domain_Name": "",
+    "Record_Type": "",
+    "Record_TTL": "",
+    "Record_Comment": "",
+    "Record_Proxied": "",
+    "API_Token": "",
+    "ZONE_ID": "",
+    "Records_URI": "https://api.cloudflare.com/client/v4/zones/{ZONE_ID}/dns_records/",
+    "Update_URI": "https://api.cloudflare.com/client/v4/zones/{ZONE_ID}/dns_records/{Record_ID}"
+}

@@ -1,0 +1,49 @@
+# Update DNS Record for domain after public IP change
+
+# Config-File
+$configPath = "$PSScriptRoot\Config\config.json"
+
+if (-not (Test-Path $configPath)) {
+    Write-Error "Config-Datei missing"
+    exit 1
+}
+
+$Config = Get-Content $configPath -Raw | ConvertFrom-Json
+
+# Insert ZONE_ID
+$Config.Records_URI = $Config.Records_URI -replace '{ZONE_ID}', $Config.ZONE_ID
+$Config.Update_URI = $Config.Update_URI -replace '{ZONE_ID}', $Config.ZONE_ID
+
+# Create Secure Token
+$Secure_Token = $(ConvertTo-SecureString $Config.API_Token -AsPlainText)
+
+# Get ID of record to update
+$DNS_Records = Invoke-RestMethod -Uri $Config.Records_URI -Authentication Bearer -Token $Secure_Token
+
+if ($DNS_Records) {
+    $Record = $DNS_Records.result | Where-Object {$_.type -eq $Config.Record_Type -and $_.name -eq $Config.Domain_Name}
+    if ($Record) {
+        $Record_ID = $Record | Select-Object -ExpandProperty id
+        # Insert Record_ID
+        $Update_URI = $Config.Update_URI -replace '{Record_ID}', $Record_ID
+
+        # Create body for PATCH request
+        $body = @{
+            name    = $Config.Domain_Name
+            ttl     = $Config.Record_TTL
+            type    = $Config.Record_Type
+            comment = $Config.Record_Comment
+            content = $Config.NewIP
+            proxied = $Config.Record_Proxied
+        } | ConvertTo-Json -Depth 3
+
+        $Update_Result = Invoke-WebRequest -Uri $Update_URI -Authentication Bearer -Token $Secure_Token -Method Patch -ContentType 'application/json' -Body $body
+        Write-Host $Update_Result
+    } else {
+        Write-Error "No matching $Config.Record_Type Record found."
+        exit 3
+    }
+} else {
+    Write-Error "No Records fetched."
+    exit 2
+}
