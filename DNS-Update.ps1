@@ -72,7 +72,7 @@ if ($DNS_Records) {
         $Update_Result = Invoke-RestMethod -Uri $Update_URI -Authentication Bearer -Token $Secure_Token -Method Patch -ContentType 'application/json' -Body $body
         
         # Set up Email Notification on success or failure
-        @smtpParams = @{
+        $smtpParams = @{
             SMTPServer = $Config.SMTP_Server
             Port       = $Config.SMTP_Port
             Credential = New-Object System.Management.Automation.PSCredential ($Config.SMTP_Username, (ConvertTo-SecureString $Config.SMTP_Password -AsPlainText -Force))
@@ -80,8 +80,6 @@ if ($DNS_Records) {
             To         = $Config.Email_To
         }
 
-        
-        
         if ($Update_Result.success) {
             Write-Host "Record updated successfully."
 
