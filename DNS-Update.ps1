@@ -1,5 +1,9 @@
 # Update DNS Record for domain after public IP change
 
+param (
+    [switch]$ipcheck
+);
+
 # Config-File
 $configPath = "$PSScriptRoot\Config\config.json"
 
@@ -9,6 +13,17 @@ if (-not (Test-Path $configPath)) {
 }
 
 $Config = Get-Content $configPath -Raw | ConvertFrom-Json
+
+# Get Public IP of host if -ipcheck is set
+if ($ipcheck) {
+    try {
+        $PublicIP = Invoke-RestMethod -Uri "https://api.ipify.org?format=json" -ErrorAction Stop
+        $Config.NewIP = $PublicIP.ip
+    } catch {
+        Write-Error "Could not retrieve Public IP."
+        exit 4
+    }
+}
 
 # Insert ZONE_ID
 $Config.Records_URI = $Config.Records_URI -replace '{ZONE_ID}', $Config.ZONE_ID
