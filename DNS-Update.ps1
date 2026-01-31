@@ -39,6 +39,24 @@ if ($DNS_Records) {
     $Record = $DNS_Records.result | Where-Object {$_.type -eq $Config.Record_Type -and $_.name -eq $Config.Domain_Name}
     if ($Record) {
         $Record_ID = $Record | Select-Object -ExpandProperty id
+
+        # Check for changes
+        $changes = false;
+        if ($Record.name -ne $Config.Domain_Name `
+            -or $Record.ttl -ne $Config.Record_TTL `
+            -or $Record.type -ne $Config.Record_Type `
+            -or $Record.comment -ne $Config.Record_Comment `
+            -or $Record.content -ne $Config.NewIP `
+            -or $Record.proxied -ne $Config.Record_Proxied) {
+            $changes = true;
+        }
+
+        # Stop script if no changes detected
+        if (-not $changes) {
+            Write-Host "No changes detected. Exiting."
+            exit 0;
+        }
+        
         # Insert Record_ID
         $Update_URI = $Config.Update_URI -replace '{Record_ID}', $Record_ID
 
