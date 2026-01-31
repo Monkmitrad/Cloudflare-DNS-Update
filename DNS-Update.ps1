@@ -19,7 +19,8 @@ if ($ipcheck) {
     try {
         $PublicIP = Invoke-RestMethod -Uri "https://api.ipify.org?format=json" -ErrorAction Stop
         $Config.NewIP = $PublicIP.ip
-    } catch {
+    }
+    catch {
         Write-Error "Could not retrieve Public IP."
         exit 4
     }
@@ -36,25 +37,23 @@ $Secure_Token = $(ConvertTo-SecureString $Config.API_Token -AsPlainText)
 $DNS_Records = Invoke-RestMethod -Uri $Config.Records_URI -Authentication Bearer -Token $Secure_Token
 
 if ($DNS_Records) {
-    $Record = $DNS_Records.result | Where-Object {$_.type -eq $Config.Record_Type -and $_.name -eq $Config.Domain_Name}
+    $Record = $DNS_Records.result | Where-Object { $_.type -eq $Config.Record_Type -and $_.name -eq $Config.Domain_Name }
     if ($Record) {
         $Record_ID = $Record | Select-Object -ExpandProperty id
 
         # Check for changes
-        $changes = false;
-        if ($Record.name -ne $Config.Domain_Name `
-            -or $Record.ttl -ne $Config.Record_TTL `
-            -or $Record.type -ne $Config.Record_Type `
-            -or $Record.comment -ne $Config.Record_Comment `
-            -or $Record.content -ne $Config.NewIP `
-            -or $Record.proxied -ne $Config.Record_Proxied) {
-            $changes = true;
-        }
+        $changes =
+        $Record.name -ne $Config.Domain_Name -or
+        $Record.ttl -ne $Config.Record_TTL -or
+        $Record.type -ne $Config.Record_Type -or
+        $Record.comment -ne $Config.Record_Comment -or
+        $Record.content -ne $Config.NewIP -or
+        $Record.proxied -ne $Config.Record_Proxied
 
         # Stop script if no changes detected
         if (-not $changes) {
             Write-Host "No changes detected. Exiting."
-            exit 0;
+            exit 0
         }
         
         # Insert Record_ID
@@ -72,11 +71,13 @@ if ($DNS_Records) {
 
         $Update_Result = Invoke-WebRequest -Uri $Update_URI -Authentication Bearer -Token $Secure_Token -Method Patch -ContentType 'application/json' -Body $body
         Write-Host $Update_Result
-    } else {
+    }
+    else {
         Write-Error "No matching $Config.Record_Type Record found."
         exit 3
     }
-} else {
+}
+else {
     Write-Error "No Records fetched."
     exit 2
 }
