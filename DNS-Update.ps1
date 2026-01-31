@@ -1,5 +1,5 @@
 # Update DNS Record for domain after public IP change
-
+using module Send-MailKitMessage
 param (
     [switch]$ipcheck
 );
@@ -69,7 +69,37 @@ if ($DNS_Records) {
             proxied = $Config.Record_Proxied
         } | ConvertTo-Json -Depth 3
 
-        $Update_Result = Invoke-WebRequest -Uri $Update_URI -Authentication Bearer -Token $Secure_Token -Method Patch -ContentType 'application/json' -Body $body
+        $Update_Result = Invoke-RestMethod -Uri $Update_URI -Authentication Bearer -Token $Secure_Token -Method Patch -ContentType 'application/json' -Body $body
+        
+        # Set up Email Notification on success or failure
+        @smtpParams = @{
+            SMTPServer = $Config.SMTP_Server
+            Port       = $Config.SMTP_Port
+            Credential = New-Object System.Management.Automation.PSCredential ($Config.SMTP_Username, (ConvertTo-SecureString $Config.SMTP_Password -AsPlainText -Force))
+            From       = $Config.Email_From
+            To         = $Config.Email_To
+        }
+
+        
+        
+        if ($Update_Result.success) {
+            Write-Host "Record updated successfully."
+
+            # Send Email Notification
+            $EmailBody = $Config.Email_Body -replace '{Domain_Name}', $Config.Domain_Name -replace '{NewIP}', $Config.NewIP
+            $smtpParams.Subject = $Config.Email_Subject, $smtpParams.Body = $EmailBody
+            Send-MailKitMessage @smtpParams
+        }
+        else {
+            # Send EMail with failure info
+            $EmailBody = "Failed to update DNS record for domain: $Config.Domain_Name. Error details: $($Update_Result.errors)"
+            $smtpParams.Subject = "Failed to update DNS record" 
+            $smtpParams.body = $EmailBody
+            Send-MailKitMessage @smtpParams
+
+            Write-Error "Failed to update the record."
+            exit 5
+        }
     }
     else {
         Write-Error "No matching $Config.Record_Type Record found."

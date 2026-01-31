@@ -8,5 +8,13 @@
     "API_Token": "",
     "ZONE_ID": "",
     "Records_URI": "https://api.cloudflare.com/client/v4/zones/{ZONE_ID}/dns_records/",
-    "Update_URI": "https://api.cloudflare.com/client/v4/zones/{ZONE_ID}/dns_records/{Record_ID}"
+    "Update_URI": "https://api.cloudflare.com/client/v4/zones/{ZONE_ID}/dns_records/{Record_ID}",
+    "SMTP_Server": "",
+    "SMTP_Port": "",
+    "SMTP_Username": "",
+    "SMTP_Password": "",
+    "Email_From": "",
+    "Email_To": "",
+    "Email_Subject": "Cloudflare DNS Update Notification",
+    "Email_Body": "The DNS record for {Domain_Name} has been updated to the new IP address: {NewIP}."
 }
