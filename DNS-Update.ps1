@@ -70,7 +70,6 @@ if ($DNS_Records) {
         } | ConvertTo-Json -Depth 3
 
         $Update_Result = Invoke-WebRequest -Uri $Update_URI -Authentication Bearer -Token $Secure_Token -Method Patch -ContentType 'application/json' -Body $body
-        Write-Host $Update_Result
     }
     else {
         Write-Error "No matching $Config.Record_Type Record found."
