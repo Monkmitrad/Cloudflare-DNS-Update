@@ -46,7 +46,7 @@ if ($DNS_Records) {
         $Record.name -ne $Config.Domain_Name -or
         $Record.ttl -ne $Config.Record_TTL -or
         $Record.type -ne $Config.Record_Type -or
-        $Record.comment -ne $Config.Record_Comment -or
+        # $Record.comment -ne $Config.Record_Comment -or
         $Record.content -ne $Config.NewIP -or
         $Record.proxied -ne $Config.Record_Proxied
 
@@ -64,7 +64,7 @@ if ($DNS_Records) {
             name    = $Config.Domain_Name
             ttl     = $Config.Record_TTL
             type    = $Config.Record_Type
-            comment = $Config.Record_Comment
+            comment = $Config.Record_Comment + " Updated: $(Get-Date)"
             content = $Config.NewIP
             proxied = $Config.Record_Proxied
         } | ConvertTo-Json -Depth 3
